@@ -1,0 +1,78 @@
+version: "3.9"
+
+services:
+  server:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: fl-server
+    command: ["python", "server/fl_server.py", "--address", "0.0.0.0:8080", "--rounds", "5"]
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./shared:/app/shared
+
+  client1:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: fl-client-1
+    command: ["python", "client/fl_client.py", "--client-id", "1", "--server-address", "server:8080"]
+    environment:
+      - SERVER_ADDRESS=server:8080
+    depends_on:
+      - server
+    volumes:
+      - ./shared:/app/shared
+
+  client2:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: fl-client-2
+    command: ["python", "client/fl_client.py", "--client-id", "2", "--server-address", "server:8080"]
+    environment:
+      - SERVER_ADDRESS=server:8080
+    depends_on:
+      - server
+    volumes:
+      - ./shared:/app/shared
+
+  client3:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: fl-client-3
+    command: ["python", "client/fl_client.py", "--client-id", "3", "--server-address", "server:8080"]
+    environment:
+      - SERVER_ADDRESS=server:8080
+    depends_on:
+      - server
+    volumes:
+      - ./shared:/app/shared
+
+  client4:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: fl-client-4
+    command: ["python", "client/fl_client.py", "--client-id", "4", "--server-address", "server:8080"]
+    environment:
+      - SERVER_ADDRESS=server:8080
+    depends_on:
+      - server
+    volumes:
+      - ./shared:/app/shared
+
+  client5:
+    build:
+      context: .
+      dockerfile: client/Dockerfile
+    container_name: fl-client-5
+    command: ["python", "client/fl_client.py", "--client-id", "5", "--server-address", "server:8080"]
+    environment:
+      - SERVER_ADDRESS=server:8080
+    depends_on:
+      - server
+    volumes:
+      - ./shared:/app/shared
