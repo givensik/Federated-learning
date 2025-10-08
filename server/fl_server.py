@@ -1,5 +1,5 @@
 from __future__ import annotations
-
+import os
 import argparse
 from typing import Dict, Tuple
 
@@ -43,6 +43,16 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--rounds", type=int, default=5, help="Number of federated rounds")
     return parser.parse_args()
 
+def aggregate_metrics(metrics) -> Dict[str, float]:
+    if not metrics:
+        return {}
+    total_examples = sum(num_examples for num_examples, _ in metrics)
+    if total_examples == 0:
+        return {"accuracy": 0.0}
+    weighted_accuracy = sum(
+        num_examples * metric.get("accuracy", 0.0) for num_examples, metric in metrics
+    )
+    return {"accuracy": weighted_accuracy / total_examples}
 
 def main() -> None:
     args = parse_args()
@@ -57,23 +67,26 @@ def main() -> None:
         on_fit_config_fn=fit_config_fn,
     )
 
-    fl.server.start_server(
+    history = fl.server.start_server(
         server_address=args.address,
         config=fl.server.ServerConfig(num_rounds=args.rounds),
         strategy=strategy,
     )
+    # 학습 로그 파일로 저장
+    save_path = os.path.join(os.path.dirname(__file__), "fl_training_log.csv")
+    with open(save_path, "w") as f:
+        f.write("round,loss,accuracy\n")
+        for (r, loss), (_, acc) in zip(
+            history.losses_centralized, 
+            history.metrics_centralized["accuracy"]
+        ):
+            f.write(f"{r},{loss:.6f},{acc:.6f}\n")
+
+    print("Federated Learning log saved to fl_training_log.csv")
+
+
+
 
 
 if __name__ == "__main__":
     main()
-
-def aggregate_metrics(metrics) -> Dict[str, float]:
-    if not metrics:
-        return {}
-    total_examples = sum(num_examples for num_examples, _ in metrics)
-    if total_examples == 0:
-        return {"accuracy": 0.0}
-    weighted_accuracy = sum(
-        num_examples * metric.get("accuracy", 0.0) for num_examples, metric in metrics
-    )
-    return {"accuracy": weighted_accuracy / total_examples}

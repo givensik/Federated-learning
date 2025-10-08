@@ -89,7 +89,9 @@ def main() -> None:
     model = ActivityMLP(config["input_dim"], config["num_classes"])
 
     client = FlowerClient(client_id, train_loader, test_loader, model)
-    fl.client.start_numpy_client(server_address=server_address, client=client)
+    # Use new API: convert the NumPyClient to a gRPC Client via .to_client()
+    # This avoids the deprecation warning from start_numpy_client().
+    fl.client.start_client(server_address=server_address, client=client.to_client())
 
 
 if __name__ == "__main__":

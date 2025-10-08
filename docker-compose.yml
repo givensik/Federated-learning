@@ -11,6 +11,8 @@ services:
       - "8080:8080"
     volumes:
       - ./shared:/app/shared
+      - ./server:/app/server   # ← 추가
+      - ./client:/app/client   # ← 추가 (공통 모듈 import 시 필요)
 
   client1:
     build:
@@ -24,6 +26,7 @@ services:
       - server
     volumes:
       - ./shared:/app/shared
+      - ./client:/app/client   # ← 추가
 
   client2:
     build:
@@ -37,6 +40,7 @@ services:
       - server
     volumes:
       - ./shared:/app/shared
+      - ./client:/app/client   # ← 추가
 
   client3:
     build:
@@ -50,6 +54,7 @@ services:
       - server
     volumes:
       - ./shared:/app/shared
+      - ./client:/app/client   # ← 추가
 
   client4:
     build:
@@ -63,6 +68,7 @@ services:
       - server
     volumes:
       - ./shared:/app/shared
+      - ./client:/app/client   # ← 추가
 
   client5:
     build:
@@ -76,3 +82,4 @@ services:
       - server
     volumes:
       - ./shared:/app/shared
+      - ./client:/app/client   # ← 추가
