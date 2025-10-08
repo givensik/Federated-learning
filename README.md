@@ -18,10 +18,13 @@ Federated learning playground that emulates five non-IID Human Activity Recognit
    docker-compose up --build
    ```
 2. Monitor the Flower server logs (`fl-server`) for round progression and aggregated metrics.
+-> 실행하고 나면 /server/fl_training_log.csv에 round,loss,accuracy가 생김
+
 3. Shut down when finished:
    ```bash
    docker-compose down
    ```
+
 
 All containers mount the `shared` directory, so updated models or data instantly propagate across the federation.
 
