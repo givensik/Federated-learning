@@ -6,7 +6,7 @@ services:
       context: .
       dockerfile: client/Dockerfile
     container_name: fl-server
-    command: ["python", "server/fl_server.py", "--address", "0.0.0.0:8080", "--rounds", "5"]
+    command: ["python", "server/fl_server.py", "--address", "0.0.0.0:8080", "--rounds", "20"]
     ports:
       - "8080:8080"
     volumes:

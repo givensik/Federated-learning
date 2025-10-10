@@ -5,6 +5,8 @@ import os
 from typing import Dict, Tuple
 
 import flwr as fl
+import socket
+import time
 import torch
 from torch import nn
 
@@ -89,8 +91,30 @@ def main() -> None:
     model = ActivityMLP(config["input_dim"], config["num_classes"])
 
     client = FlowerClient(client_id, train_loader, test_loader, model)
+    # Wait until the server is reachable over TCP to avoid immediate connection
+    # refused errors when docker-compose starts clients before the server
+    def wait_for_server(addr: str, timeout: int = 60) -> None:
+        host, port_str = addr.split(":")
+        port = int(port_str)
+        start = time.time()
+        while True:
+            try:
+                with socket.create_connection((host, port), timeout=2):
+                    return
+            except OSError:
+                if time.time() - start > timeout:
+                    raise RuntimeError(f"Timeout waiting for server at {addr}")
+                time.sleep(1)
+
+    try:
+        wait_for_server(server_address, timeout=120)
+    except RuntimeError as exc:
+        # If the server doesn't become available within the timeout, surface
+        # a clear error instead of letting gRPC throw a less-explanatory
+        # exception and exiting silently.
+        raise
+
     # Use new API: convert the NumPyClient to a gRPC Client via .to_client()
-    # This avoids the deprecation warning from start_numpy_client().
     fl.client.start_client(server_address=server_address, client=client.to_client())
 
 

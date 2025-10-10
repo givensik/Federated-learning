@@ -1,7 +1,7 @@
 from __future__ import annotations
 import os
 import argparse
-from typing import Dict, Tuple
+from typing import Dict, Tuple, Optional
 
 import flwr as fl
 import torch
@@ -40,7 +40,12 @@ def evaluate_fn() -> fl.server.strategy.EvaluateFn:
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Flower FL server for UCI HAR simulation")
     parser.add_argument("--address", type=str, default="0.0.0.0:8080", help="gRPC server address")
-    parser.add_argument("--rounds", type=int, default=5, help="Number of federated rounds")
+    parser.add_argument(
+        "--rounds",
+        type=int,
+        default=None,
+        help="Number of federated rounds (omit for indefinite run)",
+    )
     return parser.parse_args()
 
 def aggregate_metrics(metrics) -> Dict[str, float]:
@@ -67,11 +72,17 @@ def main() -> None:
         on_fit_config_fn=fit_config_fn,
     )
 
-    history = fl.server.start_server(
-        server_address=args.address,
-        config=fl.server.ServerConfig(num_rounds=args.rounds),
-        strategy=strategy,
-    )
+    if args.rounds is None:
+        history = fl.server.start_server(
+            server_address=args.address,
+            strategy=strategy,
+        )
+    else:
+        history = fl.server.start_server(
+            server_address=args.address,
+            config=fl.server.ServerConfig(num_rounds=args.rounds),
+            strategy=strategy,
+        )
     # 학습 로그 파일로 저장
     save_path = os.path.join(os.path.dirname(__file__), "fl_training_log.csv")
     with open(save_path, "w") as f:
