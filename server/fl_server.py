@@ -60,7 +60,10 @@ def aggregate_metrics(metrics) -> Dict[str, float]:
     return {"accuracy": weighted_accuracy / total_examples}
 
 def main() -> None:
+    # 파라미터 처리
     args = parse_args()
+
+    # 전략 정의 -> orchestration을 조율하는 설정
     strategy = fl.server.strategy.FedAvg(
         fraction_fit=1.0,
         fraction_evaluate=1.0,
@@ -83,6 +86,7 @@ def main() -> None:
             config=fl.server.ServerConfig(num_rounds=args.rounds),
             strategy=strategy,
         )
+    
     # 학습 로그 파일로 저장
     save_path = os.path.join(os.path.dirname(__file__), "fl_training_log.csv")
     with open(save_path, "w") as f:
